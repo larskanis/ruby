@@ -298,7 +298,7 @@ class TestRubyOptions < Test::Unit::TestCase
       @verbose = $VERBOSE
       $VERBOSE = nil
 
-      ENV['PATH'] = File.dirname(t.path)
+      ENV['PATH'] = [File.dirname(t.path), path_orig].compact.join(File::PATH_SEPARATOR)
 
       assert_in_out_err(%w(-S) + [File.basename(t.path)], "", %w(1), [])
 
