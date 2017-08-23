@@ -6,7 +6,7 @@ environment:
   ruby_version: "24-%Platform%"
   zlib_version: "1.2.11"
   matrix:
-    - vs: "120"
+    #- vs: "120"
     - MSYSTEM: "MINGW64"
     - MSYSTEM: "MINGW32"
 install:
@@ -22,10 +22,11 @@ build_script:
       appveyor_mswin.cmd build_script
     )
 test_script:
-  - IF DEFINED MSYSTEM (
-      c:/msys64/usr/bin/bash -lc "$(cygpath ${APPVEYOR_BUILD_FOLDER})/appveyor_mingw.sh test_script"
-    ) else (
-      appveyor_mswin.cmd test_script
-    )
+  - SET PATH=c:/Ruby%ruby_version:-x86=%/bin;c:/Program Files/Git/cmd;c:/Windows/system32
+  - SET OPENSSL_CONF=
+  - ridk enable
+  - cd build
+  - miniruby.exe -I../lib -I. -I.ext/common ../tool/runruby.rb --extout=.ext -- --disable-gems ../test/runner.rb --excludes-dir=../test/excludes "--name=!/memory_leak/" -q -j%NUMBER_OF_PROCESSORS% openssl
+  - miniruby.exe -I../lib -I. -I.ext/common ../tool/runruby.rb --extout=.ext -- --disable-gems ../test/runner.rb --excludes-dir=../test/excludes "--name=!/memory_leak/" -q -j%NUMBER_OF_PROCESSORS%
 matrix:
   fast_finish: false
