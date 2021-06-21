@@ -40,9 +40,14 @@ jobs:
           ruby-version: 2.6
           mingw: _upgrade_ gdbm gmp libffi libyaml openssl ragel readline
           msys2: automake1.16 bison
+
       - name: Prepend PATH for UCRT64
         if: matrix.msystem == 'UCRT64'
         run: echo "PATH=c:/msys64/ucrt64/bin;$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install packages for UCRT64
+        if: matrix.msystem == 'UCRT64'
+        run: c:/msys64/usr/bin/sh -c "pacman --sync --refresh --needed --noconfirm  ${MINGW_PACKAGE_PREFIX}-gcc"
+
       - name: where check
         run: |
           # show where
