@@ -19,8 +19,13 @@ jobs:
       GITPULLOPTIONS: --no-tags origin ${{github.ref}}
     strategy:
       matrix:
-        test_task: [ "check" ] # to make job names consistent
-        msystem: [ "MINGW64", "UCRT64" ]
+        include:
+          - msystem: "MINGW64"
+            base_ruby: 2.6
+            test_task: [ "check" ] # to make job names consistent
+          - msystem: "UCRT64"
+            base_ruby: head
+            test_task: [ "check" ] # to make job names consistent
       fail-fast: false
     steps:
       - run: mkdir build
@@ -35,19 +40,12 @@ jobs:
         with:
           path: src
       - name: Set up Ruby & MSYS2
-        uses: MSP-Greg/setup-ruby-pkgs@v1
+        uses: MSP-Greg/setup-ruby-pkgs@ucrt
         with:
-          ruby-version: 2.6
-          mingw: _upgrade_ gdbm gmp libffi libyaml openssl ragel readline
+          ruby-version: ${{ matrix.base_ruby }}
+          setup-ruby-ref: MSP-Greg/ruby-setup-ruby/00-win-ucrt
+          mingw: _upgrade_ gdbm gmp libffi libyaml openssl ragel readline gcc
           msys2: automake1.16 bison
-
-      - name: Prepend PATH for UCRT64
-        if: matrix.msystem == 'UCRT64'
-        run: echo "PATH=c:/msys64/ucrt64/bin;$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Install packages for UCRT64
-        if: matrix.msystem == 'UCRT64'
-        run: c:/msys64/usr/bin/sh -c "pacman --sync --refresh --needed --noconfirm  ${MINGW_PACKAGE_PREFIX}-gcc"
-
       - name: where check
         run: |
           # show where
