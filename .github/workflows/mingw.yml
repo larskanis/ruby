@@ -9,7 +9,6 @@ jobs:
     runs-on: windows-2019
     env:
       MSYSTEM: ${{ matrix.msystem }}
-      MSYSTEM_PREFIX: /${{ matrix.msystem.lowercase }}
       MSYS2_ARCH: x86_64
       CHOST: "x86_64-w64-mingw32"
       CFLAGS:   "-march=x86-64 -mtune=generic -O3 -pipe -fstack-protector-strong"
@@ -41,6 +40,9 @@ jobs:
           ruby-version: 2.6
           mingw: _upgrade_ gdbm gmp libffi libyaml openssl ragel readline
           msys2: automake1.16 bison
+      - name: Prepend PATH for UCRT64
+        if: matrix.msystem == 'UCRT64'
+        run: echo "PATH=c:/msys64/ucrt64/bin;$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: where check
         run: |
           # show where
