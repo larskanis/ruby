@@ -8,8 +8,8 @@ jobs:
   make:
     runs-on: windows-2019
     env:
-      MSYSTEM: MINGW64
-      MSYSTEM_PREFIX: /mingw64
+      MSYSTEM: ${{ matrix.msystem }}
+      MSYSTEM_PREFIX: /${{ matrix.msystem.lowercase }}
       MSYS2_ARCH: x86_64
       CHOST: "x86_64-w64-mingw32"
       CFLAGS:   "-march=x86-64 -mtune=generic -O3 -pipe -fstack-protector-strong"
@@ -21,6 +21,7 @@ jobs:
     strategy:
       matrix:
         test_task: [ "check" ] # to make job names consistent
+        msystem: [ "MINGW64", "UCRT64" ]
       fail-fast: false
     steps:
       - run: mkdir build
