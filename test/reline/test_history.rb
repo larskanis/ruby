@@ -6,6 +6,10 @@ class Reline::History::Test < Reline::TestCase
     Reline.send(:test_mode)
   end
 
+  def teardown
+    Reline.test_reset
+  end
+
   def test_ancestors
     assert_equal(Reline::History.ancestors.include?(Array), true)
   end
@@ -292,7 +296,7 @@ class Reline::History::Test < Reline::TestCase
   end
 
   def get_default_internal_encoding
-    if encoding = (RELINE_TEST_ENCODING rescue nil)
+    if encoding = Reline::IOGate.encoding
       encoding
     elsif RUBY_PLATFORM =~ /mswin|mingw/
       Encoding.default_internal || Encoding::UTF_8
