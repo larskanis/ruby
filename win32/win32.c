@@ -120,6 +120,7 @@ static char *w32_getenv(const char *name, UINT cp);
 #define enough_to_get(n) (--(n) >= 0)
 #define enough_to_put(n) (--(n) >= 0)
 
+// #define WIN32_DEBUG 1
 #ifdef WIN32_DEBUG
 #define Debug(something) something
 #else
@@ -1293,7 +1294,7 @@ CreateChild(struct ChildRecord *child, const WCHAR *cmd, const WCHAR *prog, HAND
     else {
         aStartupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
     }
-//printf("CreateChild: stdin:(%p), stdout:(%p) stderr:(%p)\n", aStartupInfo.hStdInput, aStartupInfo.hStdOutput, aStartupInfo.hStdError);
+    Debug(fprintf(stderr, "CreateChild: stdin:(%p), stdout:(%p) stderr:(%p)\n", aStartupInfo.hStdInput, aStartupInfo.hStdOutput, aStartupInfo.hStdError));
 
     dwCreationFlags |= NORMAL_PRIORITY_CLASS;
 
@@ -2593,7 +2594,7 @@ static int __pioinfo_size = 0;
 static inline ioinfo*
 _pioinfo(int fd)
 {
-//     printf("ioget: %d (size: %d)\n", fd, __pioinfo_size);
+    Debug(fprintf(stderr, "ioget: %d (size: %d)\n", fd, __pioinfo_size));
     if (fd < 0 || fd > __pioinfo_size)
         return NULL;
 
@@ -2617,7 +2618,7 @@ static int rb_w32_alloc_osfhandle(intptr_t osfhandle) {
     __pioinfo[fd].osfile = FTEXT;
     InitializeCriticalSection(&__pioinfo[fd].lock);
 
-//    printf("ioalloc: %d (%p) (size: %d)\n", fd, TO_SOCKET(fd), __pioinfo_size);
+    Debug(fprintf(stderr, "ioalloc: %d (%p) (size: %d)\n", fd, TO_SOCKET(fd), __pioinfo_size));
     return fd;
 }
 
@@ -4460,7 +4461,8 @@ fcntl(int fd, int cmd, ...)
             flag &= ~FNOINHERIT;
         if ((ret = dupfd(hDup, flag, arg)) == -1)
             CloseHandle(hDup);
-//printf("fcntl(F_DUPFD): oldfd:%d (%p), newfd:%d (%p)\n", fd, TO_SOCKET(fd), ret, TO_SOCKET(ret));
+
+        Debug(fprintf(stderr, "fcntl(F_DUPFD): oldfd:%d (%p), newfd:%d (%p)\n", fd, TO_SOCKET(fd), ret, TO_SOCKET(ret)));
         return ret;
       }
       case F_GETFD: {
@@ -6359,7 +6361,8 @@ rb_w32_dup2(int oldfd, int newfd)
 
     _set_osfhnd(newfd, h_dup);
     set_new_std_fd(newfd);
-//printf("rb_w32_dup2: oldfd:%d (%p), newfd:%d (%p)\n", oldfd, TO_SOCKET(oldfd), newfd, TO_SOCKET(newfd));
+
+    Debug(fprintf(stderr, "rb_w32_dup2: oldfd:%d (%p), newfd:%d (%p)\n", oldfd, TO_SOCKET(oldfd), newfd, TO_SOCKET(newfd)));
     return newfd;
 }
 
@@ -6717,7 +6720,8 @@ rb_w32_pipe(int fds[2])
 
     fds[0] = fdRead;
     fds[1] = fdWrite;
-//printf("rb_w32_pipe: readfd:%d (%p), writefd:%d (%p)\n", fdRead, TO_SOCKET(fdRead), fdWrite, TO_SOCKET(fdWrite));
+
+    Debug(fprintf(stderr, "rb_w32_pipe: readfd:%d (%p), writefd:%d (%p)\n", fdRead, TO_SOCKET(fdRead), fdWrite, TO_SOCKET(fdWrite)));
 
     return 0;
 }
@@ -7136,12 +7140,12 @@ rb_w32_close(int fd)
     int save_errno = errno;
 
     if (!is_socket(sock)) {
-//printf("rb_w32_close(nonsocket): fd:%d (%p)\n", fd, TO_SOCKET(fd));
+        Debug(fprintf(stderr, "rb_w32_close(nonsocket): fd:%d (%p)\n", fd, TO_SOCKET(fd)));
         UnlockFile((HANDLE)sock, 0, 0, LK_LEN, LK_LEN);
         constat_delete((HANDLE)sock);
         return CloseHandle(sock);
     }
-//printf("rb_w32_close(socket): fd:%d (%p)\n", fd, TO_SOCKET(fd));
+    Debug(fprintf(stderr, "rb_w32_close(socket): fd:%d (%p)\n", fd, TO_SOCKET(fd)));
     _set_osfhnd(fd, (SOCKET)INVALID_HANDLE_VALUE);
     socklist_delete(&sock, NULL);
 //     _close(fd);
@@ -7226,7 +7230,7 @@ rb_w32_read(int fd, void *buf, size_t size)
 
     rb_acrt_lowio_lock_fh(fd);
 
-//printf("rb_w32_read: fd:%d (%p)\n", fd, TO_SOCKET(fd));
+    Debug(fprintf(stderr, "rb_w32_read: fd:%d (%p)\n", fd, TO_SOCKET(fd)));
     if (_osfile(fd) & FTEXT) {
 //         return _read(fd, buf, size);
         if (!ReadFile((HANDLE)_osfhnd(fd), buf, size, &read, NULL)) {
