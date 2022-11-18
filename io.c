@@ -175,6 +175,8 @@ off_t __syscall(quad_t number, ...);
 #define open	rb_w32_uopen
 #undef rename
 #define rename(f, t)	rb_w32_urename((f), (t))
+#undef setmode
+#define setmode	rb_w32_setmode
 #endif
 
 VALUE rb_cIO;
