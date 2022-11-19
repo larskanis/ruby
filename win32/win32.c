@@ -5989,12 +5989,43 @@ rb_w32_lstati128(const char *path, struct stati128 *st)
 rb_off_t
 rb_w32_lseek(int fd, rb_off_t ofs, int whence)
 {
+    LARGE_INTEGER liDistanceToMove;
+    LARGE_INTEGER lNewFilePointer;
+    DWORD dwMoveMethod;
     SOCKET sock = TO_SOCKET(fd);
+
     if (is_socket(sock) || is_pipe(sock)) {
         errno = ESPIPE;
         return -1;
     }
-    return _lseeki64(fd, ofs, whence);
+
+    switch(whence) {
+        case SEEK_SET:
+            dwMoveMethod = FILE_BEGIN;
+            break;
+        case SEEK_CUR:
+            dwMoveMethod = FILE_CURRENT;
+            break;
+        case SEEK_END:
+            dwMoveMethod = FILE_END;
+            break;
+        default:
+            rb_bug("rb_w32_lseek() invalid whence");
+    }
+
+    liDistanceToMove.QuadPart = ofs;
+
+//     return _lseeki64(fd, ofs, whence);
+    if (!SetFilePointerEx(
+            TO_HANDLE(fd),
+            liDistanceToMove,
+            &lNewFilePointer,
+            dwMoveMethod
+        )) {
+        errno = map_errno(GetLastError());
+        return -1;
+    }
+    return lNewFilePointer.QuadPart;
 }
 
 /* License: Ruby's */

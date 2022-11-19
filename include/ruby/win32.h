@@ -401,11 +401,8 @@ extern int rb_w32_utruncate(const char *path, rb_off_t length);
 
 #undef HAVE_FTRUNCATE
 #define HAVE_FTRUNCATE 1
-#if defined HAVE_FTRUNCATE64
-#define ftruncate ftruncate64
-#else
+#undef ftruncate
 #define ftruncate rb_w32_ftruncate
-#endif
 
 #undef HAVE_TRUNCATE
 #define HAVE_TRUNCATE 1
