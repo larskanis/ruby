@@ -325,6 +325,7 @@ extern int rb_w32_uaccess(const char *, int);
 extern char rb_w32_fd_is_text(int);
 extern int rb_w32_fstati128(int, struct stati128 *);
 extern int rb_w32_dup2(int, int);
+extern int rb_w32_setmode(int fd, int mode);
 
 #include <float.h>
 
