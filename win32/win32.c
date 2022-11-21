@@ -6658,8 +6658,16 @@ rb_w32_fclose(FILE *fp)
 int
 rb_w32_setmode(int fd, int mode)
 {
-  // TODO
-  return O_BINARY;
+    int oldflags = _osfile(fd);
+    int newflags = oldflags;
+
+    if (mode & O_TEXT)
+        newflags |= FTEXT;
+    else
+        newflags &= ~FTEXT;
+    _set_osflags(fd, newflags);
+
+    return oldflags & FTEXT ? O_TEXT : O_BINARY;
 }
 
 /* License: Ruby's */
