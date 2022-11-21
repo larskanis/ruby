@@ -7262,10 +7262,14 @@ rb_w32_read(int fd, void *buf, size_t size)
     if (_osfile(fd) & FTEXT) {
 //         return _read(fd, buf, size);
         if (!ReadFile(TO_HANDLE(fd), buf, size, &read, NULL)) {
+            int ret = 0;
             err = GetLastError();
-            errno = map_errno(err);
+            if (err != ERROR_BROKEN_PIPE) {
+                errno = map_errno(err);
+                ret = -1;
+            }
             rb_acrt_lowio_unlock_fh(fd);
-            return -1;
+            return ret;
         }
         rb_acrt_lowio_unlock_fh(fd);
         return read;
