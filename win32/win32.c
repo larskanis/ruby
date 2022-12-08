@@ -2687,9 +2687,9 @@ init_stdhandle(void)
      ((nullfd == (fd)) ? (keep = 1) : dup2(nullfd, fd)),	\
      (fd))
 
-    rb_w32_alloc_osfhandle( STD_INPUT_HANDLE );
-    rb_w32_alloc_osfhandle( STD_OUTPUT_HANDLE );
-    rb_w32_alloc_osfhandle( STD_ERROR_HANDLE );
+    rb_w32_alloc_osfhandle( (HANDLE)GetStdHandle(STD_INPUT_HANDLE) );
+    rb_w32_alloc_osfhandle( (HANDLE)GetStdHandle(STD_OUTPUT_HANDLE) );
+    rb_w32_alloc_osfhandle( (HANDLE)GetStdHandle(STD_ERROR_HANDLE) );
 
     /* TODO: replace non-console stdin/out handling */
     if (fileno(stdin) < 0) {
